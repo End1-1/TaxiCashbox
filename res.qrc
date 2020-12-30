@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/loading.gif</file>
+        <file>res/backspace.png</file>
+        <file>res/cancel.png</file>
+        <file>res/enter.png</file>
+        <file>res/ok.png</file>
+        <file>res/russia.png</file>
+        <file>res/shift.png</file>
+        <file>res/usa.png</file>
+        <file>CashBox.qm</file>
+    </qresource>
+</RCC>

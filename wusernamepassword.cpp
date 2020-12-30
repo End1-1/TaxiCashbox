@@ -1,0 +1,29 @@
+#include "wusernamepassword.h"
+#include "ui_wusernamepassword.h"
+#include "dlg.h";
+
+wUsernamePassword::wUsernamePassword(QWidget *parent) :
+    Widget(parent),
+    ui(new Ui::wUsernamePassword)
+{
+    ui->setupUi(this);
+    fDlg = static_cast<Dlg*>(parent);
+    connect(ui->leUsername, SIGNAL(focusIn()), this, SLOT(lineEditFocus()));
+    connect(ui->lePassword, SIGNAL(focusOut()), this, SLOT(lineEditFocus()));
+    ui->leUsername->setFocus();
+}
+
+wUsernamePassword::~wUsernamePassword()
+{
+    delete ui;
+}
+
+void wUsernamePassword::lineEditFocus()
+{
+    ui->wkbd->setLineEdit(static_cast<LineEdit*>(sender()));
+}
+
+void wUsernamePassword::on_btnNext_clicked()
+{
+    fDlg->requestAuthDriver(ui->leUsername->text(), ui->lePassword->text());
+}
