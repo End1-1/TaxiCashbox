@@ -59,10 +59,11 @@ void wMoneyInput::timeout()
 
 void wMoneyInput::on_btnNext_clicked()
 {
-    fTimer->stop();
     ui->btnNext->setEnabled(false);
     fDlg->stopReceiveMoney();
+    qApp->processEvents();
     fDlg->makePayment();
+    fTimer->stop();
 }
 
 void wMoneyInput::on_btn100_clicked()

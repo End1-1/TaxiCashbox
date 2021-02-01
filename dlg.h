@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <windows.h>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Dlg; }
@@ -32,6 +33,7 @@ public:
     void addCash(double cash);
     void makePayment();
     void firstPage();
+    void userPage();
     void makePayment(int mode, double cash);
     double fTransactionAmount;
     virtual void closeEvent(QCloseEvent *e) override;
@@ -40,6 +42,7 @@ public slots:
     void bill(WORD sum, bool canLoop);
 
 private slots:
+    void timeout();
     void auth(bool error, const QString &data);
     void authDriver(bool error, const QString &data);
     void addCashResponse(bool error, const QString &data);
@@ -50,8 +53,11 @@ private slots:
 
 private:
     Ui::Dlg *ui;
+    int fUserPageTimeout;
+    QTimer fTimer;
     QWidget *addWidget(QWidget *w);
     void removeWidget();
+    void resetData();
 
 signals:
     void totalSum(double a, double b, double c);

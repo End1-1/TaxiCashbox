@@ -35,12 +35,14 @@ Dlg::Dlg(QWidget *parent)
     }
     FSum = 0;
     fDeposit = 0;
+    fUserPageTimeout = 0;
 
     addWidget(new wLoading());
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth").arg(server), SLOT(auth(bool, QString)), this);
     hr->setFormData("terminal_name", "Terminal1");
     hr->setFormData("password", "nyt_transit_terminal__(@First)../2020");
     hr->postRequest();
+
 
 }
 
@@ -156,7 +158,7 @@ void Dlg::printWaybill(QJsonObject o)
 void Dlg::requestAuthDriver(const QString &username, const QString &password)
 {
     addWidget(new wLoading());
-    HttpRequest *hr = new HttpRequest("https://192.168.0.204/app/terminal/auth_driver", SLOT(authDriver(bool, QString)), this);
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth_driver").arg(server), SLOT(authDriver(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("token").toString());
     hr->setFormData("login", username);
     hr->setFormData("password", password);
@@ -224,6 +226,7 @@ void Dlg::auth(bool error, const QString &data)
     removeWidget();
     if (error) {
         qDebug() << data;
+        QMessageBox::critical(this, tr("Error"), data);
         return;
     }
     QJsonDocument jdoc = QJsonDocument::fromJson(data.toUtf8());
@@ -237,14 +240,15 @@ void Dlg::authDriver(bool error, const QString &data)
     QJsonDocument jdoc = QJsonDocument::fromJson(data.toUtf8());
     QJsonObject jo = jdoc.object();
     if (error) {
-        wFinish *w = new wFinish(this);
+        qDebug() << data;
+        wFinish *w = new wFinish(true, this);
         w->setMessage(jo["message"].toString());
         addWidget(w);
         return;
     }
     _s.setValue("driver_token", jo["access_token"].toString());
     addWidget(new wLoading());
-    HttpRequest *hr = new HttpRequest("https://192.168.0.204/app/terminal/get_debts", SLOT(debts(bool, QString)), this);
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/get_debts").arg(server), SLOT(debts(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->getRequest();
 }
@@ -263,7 +267,10 @@ void Dlg::payResponse(bool error, const QString &data)
 {
     qDebug() << data;
     if (error) {
-
+        HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/get_debts").arg(server), SLOT(debts(bool, QString)), this);
+        hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
+        hr->getRequest();
+        return;
     }
     addWidget(new wFinish(this));
     if (fMode == 3) {
@@ -356,6 +363,11 @@ void Dlg::bill(WORD sum, bool canLoop)
     qApp->processEvents();
 }
 
+void Dlg::timeout()
+{
+    fUserPageTimeout++;
+}
+
 QWidget *Dlg::addWidget(QWidget *w)
 {
     removeWidget();
@@ -374,7 +386,7 @@ void Dlg::addCash(double cash)
 {
     c.FCanPollingLoop = false;
     c.Reset();
-    HttpRequest *hr = new HttpRequest("https://192.168.0.204/app/terminal/add_cash", SLOT(addCashResponse(bool, QString)), this);
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/add_cash").arg(server), SLOT(addCashResponse(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->setFormData("type", QString::number(fMode));
     hr->setFormData("cash", QString::number(cash, 'f', 2));
@@ -386,15 +398,30 @@ void Dlg::makePayment()
     makePayment(fMode, FSum);
 }
 
-void Dlg::firstPage()
+void Dlg::resetData()
 {
+    fUserPageTimeout = 0;
     FSum = 0;
     FRemain = 0;
     FNeeded = 0;
     fMode = 0;
     fDeposit = 0;
     c.FCanPollingLoop = false;
+}
+
+void Dlg::firstPage()
+{
+    resetData();
     addWidget(new wUsernamePassword(this));
+}
+
+void Dlg::userPage()
+{
+    resetData();
+    addWidget(new wLoading());
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/get_debts").arg(server), SLOT(debts(bool, QString)), this);
+    hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
+    hr->getRequest();
 }
 
 void Dlg::makePayment(int mode, double cash)
@@ -413,7 +440,7 @@ void Dlg::makePayment(int mode, double cash)
         break;
     }
 
-    HttpRequest *hr = new HttpRequest("https://192.168.0.204/app/terminal/" + route, SLOT(payResponse(bool, QString)), this);
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/").arg(server) + route, SLOT(payResponse(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->setFormData("cash", QString::number(cash, 'f', 2));
 

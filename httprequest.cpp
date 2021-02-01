@@ -37,12 +37,18 @@ void HttpRequest::setFormData(const QString &name, const QString &data)
 
 void HttpRequest::postRequest()
 {
+    qDebug() << fUrl;
+    qDebug() << fHeader;
+    qDebug() << fData;
     fRequestMethod = rmPOST;
     startThread();
 }
 
 void HttpRequest::getRequest()
 {
+    qDebug() << fUrl;
+    qDebug() << fHeader;
+    qDebug() << fData;
     fRequestMethod = rmGET;
     startThread();
 }

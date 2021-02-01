@@ -13,7 +13,7 @@ class wFinish : public Widget
     Q_OBJECT
 
 public:
-    explicit wFinish(QWidget *parent = nullptr);
+    explicit wFinish(bool error, QWidget *parent = nullptr);
     ~wFinish();
     void setMessage(const QString &msg);
 
@@ -23,6 +23,7 @@ private slots:
 private:
     Ui::wFinish *ui;
     QTimer fTimer;
+    bool fError;
 };
 
 #endif // WFINISH_H

@@ -1,13 +1,14 @@
 #include "wfinish.h"
 #include "ui_wfinish.h"
 
-wFinish::wFinish(QWidget *parent) :
+wFinish::wFinish(bool error, QWidget *parent) :
     Widget(parent),
     ui(new Ui::wFinish)
 {
     ui->setupUi(this);
     connect(&fTimer, SIGNAL(timeout()), this, SLOT(timeout()));
-    fTimer.start(5000);
+    fTimer.start(2000);
+    fError = error;
 }
 
 wFinish::~wFinish()
@@ -22,5 +23,9 @@ void wFinish::setMessage(const QString &msg)
 
 void wFinish::timeout()
 {
-    fDlg->firstPage();
+    if (fError) {
+        fDlg->firstPage();
+    } else {
+        fDlg->userPage();
+    }
 }
