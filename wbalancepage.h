@@ -24,6 +24,8 @@ private slots:
 
     void on_btnWaybill_clicked();
 
+    void on_btnExit_clicked();
+
 private:
     Ui::wBalancePage *ui;
 };

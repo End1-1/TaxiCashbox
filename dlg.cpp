@@ -16,11 +16,13 @@
 #include <QAxObject>
 #include <QMessageBox>
 #include <QDir>
+#include <QMutex>
 #include <QFile>
 #include <ctime>
 
 static CashBox c;
 static QSettings _s("YELLOWTAX", "TERMINAL");
+static QMutex fMutex;
 
 Dlg::Dlg(QWidget *parent)
     : QDialog(parent)
@@ -36,6 +38,7 @@ Dlg::Dlg(QWidget *parent)
     FSum = 0;
     fDeposit = 0;
     fUserPageTimeout = 0;
+    fCurrentWidget = nullptr;
 
     addWidget(new wLoading());
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth").arg(server), SLOT(auth(bool, QString)), this);
@@ -54,7 +57,7 @@ Dlg::~Dlg()
 void Dlg::printWaybill(QJsonObject o)
 {
     srand(time(0));
-    QString r = QString("/ah.%1.xlsx").arg(rand());
+    QString r = QString("/ah.%1.xls").arg(rand());
     QJsonObject ow = o["waybill"].toObject();
     QJsonObject oc = o["car"].toObject();
     QJsonObject od = o["driver"].toObject();
@@ -72,8 +75,9 @@ void Dlg::printWaybill(QJsonObject o)
         QMessageBox::critical(0, tr("Error"), tr("File copy error") + "<br>" + srcFile.errorString());
         return;
     }
+    //QMessageBox::information(this, "", dstFile.fileName().toUtf8());
     QAxObject* excel = new QAxObject("Excel.Application", this);
-    //excel->dynamicCall("SetVisible(bool)", TRUE);
+    excel->dynamicCall("SetVisible(bool)", FALSE);
     QAxObject *workbooks = excel->querySubObject("Workbooks");
     QAxObject *workbook = workbooks->querySubObject( "Open(const QString&)", dstFile.fileName().toUtf8());
     QAxObject *sheets = workbook->querySubObject("Sheets");
@@ -223,7 +227,6 @@ void Dlg::getMoney(int mode)
 
 void Dlg::auth(bool error, const QString &data)
 {
-    removeWidget();
     if (error) {
         qDebug() << data;
         QMessageBox::critical(this, tr("Error"), data);
@@ -265,14 +268,15 @@ void Dlg::addCashResponse(bool error, const QString &data)
 
 void Dlg::payResponse(bool error, const QString &data)
 {
-    qDebug() << data;
     if (error) {
+        QMessageBox::critical(this, tr("Error"), data);
+        addWidget(new wLoading());
         HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/get_debts").arg(server), SLOT(debts(bool, QString)), this);
         hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
         hr->getRequest();
         return;
     }
-    addWidget(new wFinish(this));
+    addWidget(new wFinish(false, this));
     if (fMode == 3) {
         printWaybill(QJsonDocument::fromJson(data.toUtf8()).object());
     }
@@ -280,8 +284,6 @@ void Dlg::payResponse(bool error, const QString &data)
 
 void Dlg::debts(bool error, const QString &data)
 {
-    qDebug() << data;
-    removeWidget();
     if (error) {
         return;
     }
@@ -370,16 +372,13 @@ void Dlg::timeout()
 
 QWidget *Dlg::addWidget(QWidget *w)
 {
-    removeWidget();
+    QMutexLocker ml(&fMutex);
+    if (fCurrentWidget) {
+        fCurrentWidget->deleteLater();
+    }
+    fCurrentWidget = w;
     ui->vl->addWidget(w);
     return w;
-}
-
-void Dlg::removeWidget()
-{
-    if (ui->vl->count() > 0) {
-        ui->vl->itemAt(0)->widget()->deleteLater();
-    }
 }
 
 void Dlg::addCash(double cash)
@@ -440,14 +439,17 @@ void Dlg::makePayment(int mode, double cash)
         break;
     }
 
-    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/").arg(server) + route, SLOT(payResponse(bool, QString)), this);
-    hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
-    hr->setFormData("cash", QString::number(cash, 'f', 2));
-
     if (fMode == 2) {
-        if (cash < FDept) {
+        if (cash <= FDept) {
             double remain = FDept - cash;
             fDeposit = fDeposit > remain ? remain : fDeposit;
+        }
+        if (FDept > cash + fDeposit) {
+            fMode = 1;
+            route = "pay_balance";
+        }
+        if (fMode == 1) {
+            fDeposit = 0;
         }
     }
 
@@ -455,14 +457,20 @@ void Dlg::makePayment(int mode, double cash)
         if (cash < FNeeded) {
             double remain = FNeeded - cash;
             fDeposit = fDeposit > remain ? remain : fDeposit;
+        } else {
+            fDeposit = 0;
         }
     }
     if (fDeposit < 0) {
         fDeposit = 0;
     }
+
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/").arg(server) + route, SLOT(payResponse(bool, QString)), this);
+    hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
+    hr->setFormData("cash", QString::number(cash, 'f', 2));
     if (fMode == 2 || fMode == 3) {
         hr->setFormData("deposit", QString::number(fDeposit, 'f', 2));
-    }
+    }    
     hr->postRequest();
 }
 

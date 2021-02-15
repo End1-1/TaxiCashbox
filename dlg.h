@@ -55,8 +55,8 @@ private:
     Ui::Dlg *ui;
     int fUserPageTimeout;
     QTimer fTimer;
+    QWidget *fCurrentWidget;
     QWidget *addWidget(QWidget *w);
-    void removeWidget();
     void resetData();
 
 signals:

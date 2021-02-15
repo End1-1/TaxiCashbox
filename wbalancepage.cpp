@@ -14,7 +14,11 @@ wBalancePage::wBalancePage(QWidget *parent) :
     if (ui->leDebt->text() == "0") {
         ui->btnDept->setEnabled(false);
     }
+    if (jo["debt"].toDouble() > 0.01) {
+        ui->btnWaybill->setEnabled(false);
+    }
     ui->lbMessage->setVisible(false);
+    ui->lbTextWarning->setVisible(jo["debt"].toDouble() > 0.01);
 }
 
 wBalancePage::~wBalancePage()
@@ -55,4 +59,9 @@ void wBalancePage::on_btnWaybill_clicked()
 {
     ui->btnFillBalance->setChecked(false);
     ui->btnDept->setChecked(false);
+}
+
+void wBalancePage::on_btnExit_clicked()
+{
+    fDlg->firstPage();
 }

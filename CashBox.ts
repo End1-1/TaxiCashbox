@@ -9,30 +9,31 @@
         <translation>Терминал</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="65"/>
-        <location filename="dlg.cpp" line="69"/>
+        <location filename="dlg.cpp" line="68"/>
+        <location filename="dlg.cpp" line="72"/>
+        <location filename="dlg.cpp" line="229"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="65"/>
+        <location filename="dlg.cpp" line="68"/>
         <source>Remove file error</source>
         <translation>Невозможно удалить файл</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="69"/>
+        <location filename="dlg.cpp" line="72"/>
         <source>File copy error</source>
         <translation>Невозможно скопировать файл</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="87"/>
-        <location filename="dlg.cpp" line="94"/>
+        <location filename="dlg.cpp" line="90"/>
+        <location filename="dlg.cpp" line="97"/>
         <source>From</source>
         <translation>С</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="89"/>
-        <location filename="dlg.cpp" line="96"/>
+        <location filename="dlg.cpp" line="92"/>
+        <location filename="dlg.cpp" line="99"/>
         <source>To</source>
         <translation>по</translation>
     </message>
@@ -88,7 +89,7 @@
         <translation>Выберите действие</translation>
     </message>
     <message>
-        <location filename="wbalancepage.ui" line="109"/>
+        <location filename="wbalancepage.ui" line="163"/>
         <source>BALANCE</source>
         <translation>Пополнить
 депозит</translation>
@@ -100,18 +101,28 @@
 долг</translation>
     </message>
     <message>
-        <location filename="wbalancepage.ui" line="163"/>
+        <location filename="wbalancepage.ui" line="109"/>
         <source>WAYBILL</source>
         <translation>Получить
 путёвый лист</translation>
     </message>
     <message>
         <location filename="wbalancepage.ui" line="180"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;You can get waybill only if your debt equal to 0.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>Вы не можете получить путёвый лист пока полностью не оплатите долг.</translation>
+    </message>
+    <message>
+        <location filename="wbalancepage.ui" line="195"/>
         <source>NO ACTION SELECTED</source>
         <translation>НИЧЕГО НЕ ВЫБРАНО</translation>
     </message>
     <message>
-        <location filename="wbalancepage.ui" line="232"/>
+        <location filename="wbalancepage.ui" line="234"/>
+        <source>EXIT</source>
+        <translation>ВЫХОД</translation>
+    </message>
+    <message>
+        <location filename="wbalancepage.ui" line="271"/>
         <source>NEXT</source>
         <translation>ДАЛЕЕ</translation>
     </message>
@@ -178,12 +189,12 @@
         <translation>ДАЛЕЕ</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="40"/>
+        <location filename="wmoneyinput.cpp" line="39"/>
         <source>Deposit used</source>
         <translation>Используется депозит</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="40"/>
+        <location filename="wmoneyinput.cpp" line="39"/>
         <source>From</source>
         <translation>из</translation>
     </message>
@@ -248,7 +259,7 @@
     <message>
         <location filename="wprocessincomplete.ui" line="174"/>
         <source>NEXT</source>
-        <translation></translation>
+        <translation>ДАЛЕЕ</translation>
     </message>
 </context>
 <context>
@@ -262,16 +273,6 @@
         <location filename="wusernamepassword.ui" line="81"/>
         <source>1. Enter your username and password</source>
         <translation>Введите ваш логин и пароль</translation>
-    </message>
-    <message>
-        <location filename="wusernamepassword.ui" line="143"/>
-        <source>secret</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="wusernamepassword.ui" line="155"/>
-        <source>ydamore</source>
-        <translation></translation>
     </message>
     <message>
         <location filename="wusernamepassword.ui" line="28"/>

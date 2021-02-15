@@ -11,6 +11,9 @@ wUsernamePassword::wUsernamePassword(QWidget *parent) :
     connect(ui->leUsername, SIGNAL(focusIn()), this, SLOT(lineEditFocus()));
     connect(ui->lePassword, SIGNAL(focusOut()), this, SLOT(lineEditFocus()));
     ui->leUsername->setFocus();
+#ifndef QT_DEBUG
+    ui->lePassword->setEchoMode(QLineEdit::Password);
+#endif
 }
 
 wUsernamePassword::~wUsernamePassword()

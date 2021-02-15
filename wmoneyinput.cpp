@@ -27,10 +27,11 @@ void wMoneyInput::totalSum(double a, double b, double c)
     ui->lbNeeded->setVisible(b > 0.0001 && (fDlg->fMode == 3));
     ui->lbRemain->setVisible(c > -1 && (fDlg->fMode == 3));
 
+    double dep = 0;
     if (fDlg->fDeposit > 0) {
         if (fDlg->fMode == 2 || fDlg->fMode == 3) {
             ui->lbDeposit->setVisible(true);
-            double dep = (fDlg->fMode == 2) ? fDlg->FDept - a : fDlg->FNeeded - a;
+            dep = (fDlg->fMode == 2) ? fDlg->FDept - a : fDlg->FNeeded - a;
             if (dep < 0) {
                 dep = 0;
             } else {
@@ -42,7 +43,7 @@ void wMoneyInput::totalSum(double a, double b, double c)
 
     ui->lbAmount->setText(QString("%1 %2 %3").arg(tr("Received")).arg(float_str(a, 2)).arg(tr("RUB")));
     ui->lbNeeded->setText(QString("%1 %2 %3").arg(tr("Needed")).arg(float_str(b, 2)).arg(tr("RUB")));
-    ui->lbRemain->setText(QString("%1 %2 %3").arg(tr("Remain")).arg(float_str(c, 2)).arg(tr("RUB")));
+    ui->lbRemain->setText(QString("%1 %2 %3").arg(tr("Remain")).arg(float_str(c - dep, 2)).arg(tr("RUB")));
     qApp->processEvents();
 }
 
@@ -62,8 +63,8 @@ void wMoneyInput::on_btnNext_clicked()
     ui->btnNext->setEnabled(false);
     fDlg->stopReceiveMoney();
     qApp->processEvents();
-    fDlg->makePayment();
     fTimer->stop();
+    fDlg->makePayment();
 }
 
 void wMoneyInput::on_btn100_clicked()
