@@ -32,7 +32,7 @@ Dlg::Dlg(QWidget *parent)
 
     connect(&c, SIGNAL(ProcessMessage(int,QString)), this, SLOT(message(int,QString)));
     connect(&c, SIGNAL(PolingBill(WORD,bool)), this, SLOT(bill(WORD,bool)));
-    if (c.openComPort("COM1")) {
+    if (c.openComPort(_s.value("comp_port").toString().toUtf8().data())) {
         qDebug() << "OPENED";
     }
     FSum = 0;
