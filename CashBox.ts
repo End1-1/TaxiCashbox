@@ -9,31 +9,38 @@
         <translation>Терминал</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="68"/>
-        <location filename="dlg.cpp" line="72"/>
-        <location filename="dlg.cpp" line="229"/>
+        <location filename="dlg.cpp" line="77"/>
+        <location filename="dlg.cpp" line="81"/>
+        <location filename="dlg.cpp" line="253"/>
+        <location filename="dlg.cpp" line="293"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="68"/>
+        <location filename="dlg.cpp" line="77"/>
         <source>Remove file error</source>
         <translation>Невозможно удалить файл</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="72"/>
+        <location filename="dlg.cpp" line="81"/>
         <source>File copy error</source>
         <translation>Невозможно скопировать файл</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="90"/>
-        <location filename="dlg.cpp" line="97"/>
+        <location filename="dlg.cpp" line="99"/>
+        <location filename="dlg.cpp" line="101"/>
+        <source>Taked</source>
+        <translation>Учтен</translation>
+    </message>
+    <message>
+        <location filename="dlg.cpp" line="105"/>
+        <location filename="dlg.cpp" line="112"/>
         <source>From</source>
         <translation>С</translation>
     </message>
     <message>
-        <location filename="dlg.cpp" line="92"/>
-        <location filename="dlg.cpp" line="99"/>
+        <location filename="dlg.cpp" line="107"/>
+        <location filename="dlg.cpp" line="114"/>
         <source>To</source>
         <translation>по</translation>
     </message>
@@ -121,11 +128,6 @@
         <source>EXIT</source>
         <translation>ВЫХОД</translation>
     </message>
-    <message>
-        <location filename="wbalancepage.ui" line="271"/>
-        <source>NEXT</source>
-        <translation>ДАЛЕЕ</translation>
-    </message>
 </context>
 <context>
     <name>wFinish</name>
@@ -175,48 +177,58 @@
     </message>
     <message>
         <location filename="wmoneyinput.ui" line="143"/>
+        <source>BACK</source>
+        <translation>Назад</translation>
+    </message>
+    <message>
+        <location filename="wmoneyinput.ui" line="167"/>
         <source>+100</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="wmoneyinput.ui" line="167"/>
+        <location filename="wmoneyinput.ui" line="191"/>
         <source>+1000</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="wmoneyinput.ui" line="204"/>
+        <location filename="wmoneyinput.ui" line="228"/>
+        <source>DEPOSIT</source>
+        <translation>Зачислить на депозит</translation>
+    </message>
+    <message>
+        <location filename="wmoneyinput.ui" line="255"/>
         <source>NEXT</source>
         <translation>ДАЛЕЕ</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="39"/>
+        <location filename="wmoneyinput.cpp" line="40"/>
         <source>Deposit used</source>
         <translation>Используется депозит</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="39"/>
+        <location filename="wmoneyinput.cpp" line="40"/>
         <source>From</source>
         <translation>из</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="43"/>
+        <location filename="wmoneyinput.cpp" line="45"/>
         <source>Received</source>
         <translation>Внесено</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="43"/>
-        <location filename="wmoneyinput.cpp" line="44"/>
         <location filename="wmoneyinput.cpp" line="45"/>
+        <location filename="wmoneyinput.cpp" line="46"/>
+        <location filename="wmoneyinput.cpp" line="47"/>
         <source>RUB</source>
         <translation>руб.</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="44"/>
+        <location filename="wmoneyinput.cpp" line="46"/>
         <source>Needed</source>
         <translation>Требуется</translation>
     </message>
     <message>
-        <location filename="wmoneyinput.cpp" line="45"/>
+        <location filename="wmoneyinput.cpp" line="47"/>
         <source>Remain</source>
         <translation>Осталось внести</translation>
     </message>
@@ -280,12 +292,12 @@
         <translation>Пароль</translation>
     </message>
     <message>
-        <location filename="wusernamepassword.ui" line="131"/>
+        <location filename="wusernamepassword.ui" line="134"/>
         <source>Username</source>
         <translation>Логин</translation>
     </message>
     <message>
-        <location filename="wusernamepassword.ui" line="117"/>
+        <location filename="wusernamepassword.ui" line="120"/>
         <source>NEXT</source>
         <translation>ДАЛЕЕ</translation>
     </message>

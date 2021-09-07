@@ -3,6 +3,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QFileInfo>
+#include <QFile>
 #include <QThread>
 
 #define boundary QString("----7d935033608e27d935033608e2")
@@ -35,11 +37,33 @@ void HttpRequest::setFormData(const QString &name, const QString &data)
     fData.append(data + "\r\n");
 }
 
+void HttpRequest::setFileName(const QString &name, const QString &path)
+{
+    fFiles[name] = path;
+    QFile f(path);
+    if (f.open(QIODevice::ReadOnly)) {
+        QFileInfo fileInfo(f.fileName());
+        fData.append("--" + boundary + "\r\n");
+        fData.append("Content-Type: application/octet-stream\r\n");
+        fData.append("Content-Length: " + QString::number(f.size()) + "\r\n");
+        fData.append("Content-Disposition: form-data; filename=\"" + fileInfo.fileName() + "\"; name=\"" + name + "\"\r\n\r\n");
+        fData.append(f.readAll());
+        fData.append("\r\n");
+        f.close();
+    }
+}
+
 void HttpRequest::postRequest()
 {
     qDebug() << fUrl;
     qDebug() << fHeader;
     qDebug() << fData;
+    log("POST");
+    log(fUrl);
+    for (QMap<QString, QString>::const_iterator it = fHeader.begin(); it != fHeader.end(); it++) {
+        log(it.key() + "=" + it.value());
+    }
+    log(fData);
     fRequestMethod = rmPOST;
     startThread();
 }
@@ -49,6 +73,12 @@ void HttpRequest::getRequest()
     qDebug() << fUrl;
     qDebug() << fHeader;
     qDebug() << fData;
+    log("GET");
+    log(fUrl);
+    for (QMap<QString, QString>::const_iterator it = fHeader.begin(); it != fHeader.end(); it++) {
+        log(it.key() + "=" + it.value());
+    }
+    log(fData);
     fRequestMethod = rmGET;
     startThread();
 }
@@ -62,6 +92,16 @@ void HttpRequest::startThread()
     setParent(nullptr);
     moveToThread(t);
     t->start();
+}
+
+void HttpRequest::log(const QString &l)
+{
+    QFile f("log.txt");
+    if (f.open(QIODevice::Append)) {
+        f.write(l.toUtf8());
+        f.write("\r\n");
+        f.close();
+    }
 }
 
 void HttpRequest::start()
@@ -81,8 +121,9 @@ void HttpRequest::start()
     //nr.setRawHeader("Cache-Control", "no-cache");
     nr.setRawHeader("Accept", "application/json");
 
-    for (QMap<QString, QString>::const_iterator it = fHeader.begin(); it != fHeader.end(); it++)
+    for (QMap<QString, QString>::const_iterator it = fHeader.begin(); it != fHeader.end(); it++) {
         nr.setRawHeader(it.key().toLatin1(), it.value().toLatin1());
+    }
     switch (fRequestMethod) {
     case rmGET:
         get(nr);
@@ -96,6 +137,7 @@ void HttpRequest::start()
 void HttpRequest::finished(QNetworkReply *reply)
 {
     QByteArray data = reply->readAll();
+    log(data);
     if (reply->error() == QNetworkReply::NoError) {
         emit response(false, data);
     } else {
@@ -109,6 +151,8 @@ void HttpRequest::finished(QNetworkReply *reply)
         }
         jo["error_code"] =reply->error();
         jo["error_string"] = reply->errorString();
+        log(QString::number(reply->error()));
+        log(jo["error_string"].toString());
         emit response(true, QJsonDocument(jo).toJson());
     }
     emit done();

@@ -8,12 +8,12 @@ LineEdit::LineEdit(QWidget *parent) :
 
 void LineEdit::focusInEvent(QFocusEvent *e)
 {
-    Q_UNUSED(e);
+    QLineEdit::focusInEvent(e);
     emit focusIn();
 }
 
 void LineEdit::focusOutEvent(QFocusEvent *e)
 {
-    Q_UNUSED(e);
+    QLineEdit::focusOutEvent(e);
     emit focusOut();
 }

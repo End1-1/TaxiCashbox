@@ -32,7 +32,7 @@ Dlg::Dlg(QWidget *parent)
 
     connect(&c, SIGNAL(ProcessMessage(int,QString)), this, SLOT(message(int,QString)));
     connect(&c, SIGNAL(PolingBill(WORD,bool)), this, SLOT(bill(WORD,bool)));
-    if (c.openComPort(_s.value("comp_port").toString().toUtf8().data())) {
+    if (c.openComPort(_s.value("com_port").toString().toUtf8().data())) {
         qDebug() << "OPENED";
     }
     FSum = 0;
@@ -41,9 +41,15 @@ Dlg::Dlg(QWidget *parent)
     fCurrentWidget = nullptr;
 
     addWidget(new wLoading());
+    qApp->processEvents();
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth").arg(server), SLOT(auth(bool, QString)), this);
-    hr->setFormData("terminal_name", "Terminal1");
-    hr->setFormData("password", "nyt_transit_terminal__(@First)../2020");
+    hr->fContentType = "application/json";
+    QJsonObject jo;
+    jo["terminal_name"] = "Terminal1";
+    jo["password"] = "nyt_transit_terminal__(@First)../2020";
+    hr->fData = QJsonDocument(jo).toJson();
+//    hr->setFormData("terminal_name", "Terminal1");
+//    hr->setFormData("password", "nyt_transit_terminal__(@First)../2020");
     hr->postRequest();
 
 
@@ -57,7 +63,7 @@ Dlg::~Dlg()
 void Dlg::printWaybill(QJsonObject o)
 {
     srand(time(0));
-    QString r = QString("/ah.%1.xls").arg(rand());
+    QString r = QString("/ah_%1.xls").arg(rand());
     QJsonObject ow = o["waybill"].toObject();
     QJsonObject oc = o["car"].toObject();
     QJsonObject od = o["driver"].toObject();
@@ -88,6 +94,11 @@ void Dlg::printWaybill(QJsonObject o)
     range->dynamicCall( "SetValue(const QVariant&)", ow["number"].toString());
     range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("BI70:BI70")));
     range->dynamicCall( "SetValue(const QVariant&)", ow["number"].toString());
+
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("DY66")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1 %2").arg(tr("Taked")).arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss")));
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("DY133")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1 %2").arg(tr("Taked")).arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss")));
 
     range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("C6:C6")));
     range->dynamicCall( "SetValue(const QVariant&)", QString("%1 %2 %3 %4")
@@ -150,6 +161,14 @@ void Dlg::printWaybill(QJsonObject o)
     workbook->dynamicCall("Close(QVariant)", false);
     excel->dynamicCall("Quit()");
 
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/upload_waybill").arg(server),
+                                      SLOT(deleteFile(bool,QString)), this);
+    hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
+    hr->setProperty("file", dstFile.fileName());
+    hr->setFileName("waybill", dstFile.fileName());
+    hr->setFormData("transaction_id", ow["number"].toString());
+    hr->postRequest();
+
     delete range;
     delete statSheet;
     delete sheets;
@@ -162,7 +181,9 @@ void Dlg::printWaybill(QJsonObject o)
 void Dlg::requestAuthDriver(const QString &username, const QString &password)
 {
     addWidget(new wLoading());
-    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth_driver").arg(server), SLOT(authDriver(bool, QString)), this);
+    qApp->processEvents();
+    HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth_driver").arg(server),
+                                      SLOT(authDriver(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("token").toString());
     hr->setFormData("login", username);
     hr->setFormData("password", password);
@@ -353,6 +374,17 @@ void Dlg::message(int code, const QString &msg)
     qApp->processEvents();
 }
 
+void Dlg::deleteFile(bool error, const QString &data)
+{
+    if (error) {
+        qDebug() << "Error" << data;
+    }
+    qDebug() << data;
+    QFile f(sender()->property("file").toString());
+    f.remove();
+    sender()->deleteLater();
+}
+
 void Dlg::bill(WORD sum, bool canLoop)
 {
     addCash(sum);
@@ -410,6 +442,8 @@ void Dlg::resetData()
 
 void Dlg::firstPage()
 {
+    _s.remove("driver_token");
+    _s.remove("balance");
     resetData();
     addWidget(new wUsernamePassword(this));
 }

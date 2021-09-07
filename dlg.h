@@ -50,6 +50,7 @@ private slots:
     void debts(bool error, const QString &data);
     void on_pushButton_clicked();
     void message(int code, const QString &msg);
+    void deleteFile(bool error, const QString &data);
 
 private:
     Ui::Dlg *ui;

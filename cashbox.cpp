@@ -206,7 +206,7 @@ bool CashBox::EnableBillTypes(Nominal n)
     BYTE BillTypesByte;
     BYTE b[6];
     if (!FComConnected) {
-        errorLog("COM ïîðò çàêðûò, âûïîëíåíèå êîìàíäû RESET íå âîçìîæíî");
+        errorLog("COM порт закрыт, выполнение команды RESET не возможно");
     }
 
     BillTypesByte = 0;

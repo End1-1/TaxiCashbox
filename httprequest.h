@@ -11,16 +11,19 @@ public:
     ~HttpRequest();
     void setHeader(const QString &name, const QString &data);
     void setFormData(const QString &name, const QString &data);
+    void setFileName(const QString &name, const QString &path);
     void postRequest();
     void getRequest();
+    QByteArray fData;
+    QString fContentType;
 
 private:
     QString fUrl;
-    QString fContentType;
-    QByteArray fData;
     QMap<QString, QString> fHeader;
+    QMap<QString, QString> fFiles;
     int fRequestMethod;
     void startThread();
+    void log(const QString &l);
 
 private slots:
     void start();

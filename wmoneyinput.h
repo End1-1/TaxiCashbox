@@ -25,6 +25,10 @@ private slots:
     void on_btn100_clicked();
     void on_btn1000_clicked();
 
+    void on_btnDeposit_clicked();
+
+    void on_btnBack_clicked();
+
 private:
     Ui::wMoneyInput *ui;
     QTimer *fTimer;

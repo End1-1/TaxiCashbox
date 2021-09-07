@@ -28,37 +28,22 @@ wBalancePage::~wBalancePage()
 
 void wBalancePage::on_btnNext_clicked()
 {
-    int mode = 0;
-    if (ui->btnFillBalance->isChecked()) {
-        mode = 1;
-    } else if (ui->btnDept->isChecked()) {
-        mode = 2;
-    } else if (ui->btnWaybill->isChecked()) {
-        mode = 3;
-    }
-    if (mode == 0) {
-        ui->lbMessage->setVisible(true);
-        return;
-    }
-    fDlg->getMoney(mode);
+
 }
 
 void wBalancePage::on_btnFillBalance_clicked()
 {
-    ui->btnDept->setChecked(false);
-    ui->btnWaybill->setChecked(false);
+    fDlg->getMoney(1);
 }
 
 void wBalancePage::on_btnDept_clicked()
 {
-    ui->btnFillBalance->setChecked(false);
-    ui->btnWaybill->setChecked(false);
+    fDlg->getMoney(2);
 }
 
 void wBalancePage::on_btnWaybill_clicked()
 {
-    ui->btnFillBalance->setChecked(false);
-    ui->btnDept->setChecked(false);
+    fDlg->getMoney(3);
 }
 
 void wBalancePage::on_btnExit_clicked()

@@ -9,7 +9,7 @@ wUsernamePassword::wUsernamePassword(QWidget *parent) :
     ui->setupUi(this);
     fDlg = static_cast<Dlg*>(parent);
     connect(ui->leUsername, SIGNAL(focusIn()), this, SLOT(lineEditFocus()));
-    connect(ui->lePassword, SIGNAL(focusOut()), this, SLOT(lineEditFocus()));
+    connect(ui->lePassword, SIGNAL(focusIn()), this, SLOT(lineEditFocus()));
     ui->leUsername->setFocus();
 #ifndef QT_DEBUG
     ui->lePassword->setEchoMode(QLineEdit::Password);

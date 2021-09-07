@@ -41,10 +41,15 @@ void wMoneyInput::totalSum(double a, double b, double c)
         }
     }
 
+    ui->btnBack->setEnabled(a < 0.01);
     ui->lbAmount->setText(QString("%1 %2 %3").arg(tr("Received")).arg(float_str(a, 2)).arg(tr("RUB")));
     ui->lbNeeded->setText(QString("%1 %2 %3").arg(tr("Needed")).arg(float_str(b, 2)).arg(tr("RUB")));
     ui->lbRemain->setText(QString("%1 %2 %3").arg(tr("Remain")).arg(float_str(c - dep, 2)).arg(tr("RUB")));
-    qApp->processEvents();
+    ui->btnNext->setEnabled(c - dep < 0.001);
+    ui->btnDeposit->setEnabled(true);
+    ui->btnDeposit->setEnabled(a > 0.001);
+    ui->btn1000->setEnabled(true);
+    ui->btn100->setEnabled(true);
 }
 
 void wMoneyInput::timeout()
@@ -60,6 +65,9 @@ void wMoneyInput::timeout()
 
 void wMoneyInput::on_btnNext_clicked()
 {
+    ui->btn100->setEnabled(false);
+    ui->btn1000->setEnabled(false);
+    ui->btnDeposit->setEnabled(false);
     ui->btnNext->setEnabled(false);
     fDlg->stopReceiveMoney();
     qApp->processEvents();
@@ -69,10 +77,33 @@ void wMoneyInput::on_btnNext_clicked()
 
 void wMoneyInput::on_btn100_clicked()
 {
+    ui->btnDeposit->setEnabled(false);
+    ui->btn100->setEnabled(false);
+    ui->btn1000->setEnabled(false);
     fDlg->bill(100, true);
 }
 
 void wMoneyInput::on_btn1000_clicked()
 {
+    ui->btnDeposit->setEnabled(false);
+    ui->btn1000->setEnabled(false);
+    ui->btn100->setEnabled(false);
     fDlg->bill(1000, true);
+}
+
+void wMoneyInput::on_btnDeposit_clicked()
+{
+
+    ui->btnNext->setEnabled(false);
+    ui->btnDeposit->setEnabled(false);
+    fDlg->stopReceiveMoney();
+    qApp->processEvents();
+    fTimer->stop();
+    fDlg->fMode = 1;
+    fDlg->makePayment();
+}
+
+void wMoneyInput::on_btnBack_clicked()
+{
+    fDlg->firstPage();
 }
