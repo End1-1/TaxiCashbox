@@ -21,7 +21,7 @@
 #include <ctime>
 
 static CashBox c;
-static QSettings _s("YELLOWTAX", "TERMINAL");
+static QSettings _s("YELLOWTAXI", "TERMINAL");
 static QMutex fMutex;
 
 Dlg::Dlg(QWidget *parent)
@@ -63,7 +63,7 @@ Dlg::~Dlg()
 void Dlg::printWaybill(QJsonObject o)
 {
     srand(time(0));
-    QString r = QString("/ah_%1.xls").arg(rand());
+    QString r = QString("/ah_%1.xlsx").arg(rand());
     QJsonObject ow = o["waybill"].toObject();
     QJsonObject oc = o["car"].toObject();
     QJsonObject od = o["driver"].toObject();
@@ -83,7 +83,7 @@ void Dlg::printWaybill(QJsonObject o)
     }
     //QMessageBox::information(this, "", dstFile.fileName().toUtf8());
     QAxObject* excel = new QAxObject("Excel.Application", this);
-    excel->dynamicCall("SetVisible(bool)", FALSE);
+    excel->dynamicCall("SetVisible(bool)", TRUE);
     QAxObject *workbooks = excel->querySubObject("Workbooks");
     QAxObject *workbook = workbooks->querySubObject( "Open(const QString&)", dstFile.fileName().toUtf8());
     QAxObject *sheets = workbook->querySubObject("Sheets");
@@ -394,7 +394,6 @@ void Dlg::bill(WORD sum, bool canLoop)
         FRemain = 0;
     }
     emit totalSum(FSum, FNeeded, FRemain);
-    qApp->processEvents();
 }
 
 void Dlg::timeout()

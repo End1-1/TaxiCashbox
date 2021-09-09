@@ -2,7 +2,7 @@
 #include "dlg.h"
 #include <QSettings>
 
-static QSettings settings("YELLOWTAX", "TERMINAL");
+static QSettings settings("YELLOWTAXI", "TERMINAL");
 
 Widget::Widget(QWidget *parent) : QWidget(parent)
 {
