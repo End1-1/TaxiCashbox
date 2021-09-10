@@ -9,6 +9,7 @@
 #include "wfinish.h"
 #include "wmoneyinput.h"
 #include "wprocessincomplete.h"
+#include "QRCodeGenerator.h"
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -63,13 +64,13 @@ Dlg::~Dlg()
 void Dlg::printWaybill(QJsonObject o)
 {
     srand(time(0));
-    QString r = QString("/ah_%1.xlsx").arg(rand());
+    QString r = QString("/ah_%1.xlsm").arg(rand());
     QJsonObject ow = o["waybill"].toObject();
     QJsonObject oc = o["car"].toObject();
     QJsonObject od = o["driver"].toObject();
     QDateTime startDateTime = QDateTime::fromString(ow["start_date"].toString(), "yyyy-MM-dd HH:mm");
     QDateTime endDateTime = QDateTime::fromString(ow["end_date"].toString(), "yyyy-MM-dd HH:mm");
-    QFile srcFile(qApp->applicationDirPath() + "/wb.xlsx");
+    QFile srcFile(qApp->applicationDirPath() + "/wb.xlsm");
     QDir dstDir = QDir::tempPath();
     QFile dstFile(dstDir.absolutePath() + r);
     if (dstFile.exists()) {
@@ -81,9 +82,37 @@ void Dlg::printWaybill(QJsonObject o)
         QMessageBox::critical(0, tr("Error"), tr("File copy error") + "<br>" + srcFile.errorString());
         return;
     }
+
+    int levelIndex = 1;
+    int versionIndex = 0;
+    bool bExtent = true;
+    int maskIndex = -1;
+    QString encodeString = QString("%1").arg(ow["number"].toString());
+    CQR_Encode qrEncode;
+    bool successfulEncoding = qrEncode.EncodeData( levelIndex, versionIndex, bExtent, maskIndex, encodeString.toUtf8().data() );
+    if (!successfulEncoding) {
+        //fLog.append("Cannot encode qr image");
+    }
+    int qrImageSize = qrEncode.m_nSymbleSize;
+    int encodeImageSize = qrImageSize + ( QR_MARGIN * 2 );
+    QImage encodeImage(encodeImageSize, encodeImageSize, QImage::Format_Mono);
+    encodeImage.fill(1);
+
+    for ( int i = 0; i < qrImageSize; i++ ) {
+        for ( int j = 0; j < qrImageSize; j++ ) {
+            if ( qrEncode.m_byModuleData[i][j] ) {
+                encodeImage.setPixel(i + QR_MARGIN, j + QR_MARGIN, 0);
+            }
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(encodeImage);
+    pix = pix.scaled(100, 100);
+    pix.save(QDir::tempPath() + "/qr.png", "png", 100);
+
     //QMessageBox::information(this, "", dstFile.fileName().toUtf8());
     QAxObject* excel = new QAxObject("Excel.Application", this);
-    excel->dynamicCall("SetVisible(bool)", TRUE);
+
+    excel->dynamicCall("SetVisible(bool)", FALSE);
     QAxObject *workbooks = excel->querySubObject("Workbooks");
     QAxObject *workbook = workbooks->querySubObject( "Open(const QString&)", dstFile.fileName().toUtf8());
     QAxObject *sheets = workbook->querySubObject("Sheets");
