@@ -68,6 +68,7 @@ void Dlg::printWaybill(QJsonObject o)
     QJsonObject ow = o["waybill"].toObject();
     QJsonObject oc = o["car"].toObject();
     QJsonObject od = o["driver"].toObject();
+    QJsonObject op = o["park"].toObject();
     QDateTime startDateTime = QDateTime::fromString(ow["start_date"].toString(), "yyyy-MM-dd HH:mm");
     QDateTime endDateTime = QDateTime::fromString(ow["end_date"].toString(), "yyyy-MM-dd HH:mm");
     QFile srcFile(qApp->applicationDirPath() + "/wb.xlsm");
@@ -124,10 +125,25 @@ void Dlg::printWaybill(QJsonObject o)
     range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("BI70:BI70")));
     range->dynamicCall( "SetValue(const QVariant&)", ow["number"].toString());
 
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("O7")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1").arg(op["entity"].toObject()["full_title"].toString()));
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("O74")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1 %2").arg(op["entity"].toObject()["full_title"].toString()));
+
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("DH13:DH13")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1").arg(oc["garage_number"].toInt()));
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("DH80:DH80")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1").arg(oc["garage_number"].toInt()));
+
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("T17")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1").arg(od["license_code"].toString()));
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("T84")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1").arg(od["license_code"].toString()));
+
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("DY66")));
     range->dynamicCall("SetValue(const QVariant&)", QString("%1 %2").arg(tr("Taked")).arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss")));
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant(QString("DY133")));
-    range->dynamicCall("SetValue(const QVariant&)", QString("%1 %2").arg(tr("Taked")).arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss")));
+    range->dynamicCall("SetValue(const QVariant&)", QString("%1 %2").arg(tr("Taked")).arg(startDateTime.addSecs(12 * 60 * 60).toString("HH:mm")));
 
     range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("C6:C6")));
     range->dynamicCall( "SetValue(const QVariant&)", QString("%1 %2 %3 %4")
@@ -143,32 +159,45 @@ void Dlg::printWaybill(QJsonObject o)
                         .arg(tr("To"))
                         .arg(endDateTime.toString("dd/MM/yyyy")));
 
-    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("T10:T10")));
-    range->dynamicCall( "SetValue(const QVariant&)", oc["mark"].toString());
-    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("T77:T77")));
-    range->dynamicCall( "SetValue(const QVariant&)", oc["mark"].toString());
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("R11:R11")));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["vin"].toString());
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("R78:R78")));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["vin"].toString());
 
+//    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("AD13:AD13")));
+//    range->dynamicCall( "SetValue(const QVariant&)", oc["vin"].toString());
+//    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("AD80:AD80")));
+//    range->dynamicCall( "SetValue(const QVariant&)", oc["vin"].toString());
+
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("L14:L14")));
+    range->dynamicCall( "SetValue(const QVariant&)", od["surname"].toString() + " " + od["name"].toString() + " " + od["patronymic"].toString());
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("L81:L81")));
+    range->dynamicCall( "SetValue(const QVariant&)", od["surname"].toString() + " " + od["name"].toString() + " " + od["patronymic"].toString());
+
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("T10:T10")));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["mark"].toString() + " " + oc["model"].toString());
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("T77:T77")));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["mark"].toString() + " " + oc["model"].toString());
+
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("DH11:DH11")));
+    range->dynamicCall( "SetValue(const QVariant&)", od["kis_art"].toString());
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("DH78:DH78")));
+    range->dynamicCall( "SetValue(const QVariant&)", od["kis_art"].toString());
+
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("T17:T17")));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["udo_num"].toInt());
+    range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("T84:T84")));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["udo_num"].toInt());
 
     range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("V35:T35")));
     range->dynamicCall( "SetValue(const QVariant&)", oc["speedometer"].toInt());
     range = statSheet->querySubObject( "Range(const QVariant&)", QVariant( QString("V102:V102")));
     range->dynamicCall( "SetValue(const QVariant&)", oc["speedometer"].toInt());
 
-
-    range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("R11:R11")));
-    range->dynamicCall( "SetValue(const QVariant&)", oc["vin_code"].toString());
-    range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("R78:R78")));
-    range->dynamicCall( "SetValue(const QVariant&)", oc["vin_code"].toString());
-
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("AD13:AD13")));
-    range->dynamicCall( "SetValue(const QVariant&)", oc["state_plate"].toString());
+    range->dynamicCall( "SetValue(const QVariant&)", oc["state_license_plate"].toString());
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("AD80:AD80")));
-    range->dynamicCall( "SetValue(const QVariant&)", oc["state_plate"].toString());
-
-    range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("L14:L14")));
-    range->dynamicCall( "SetValue(const QVariant&)", QString("%1 %2").arg(od["last_name"].toString()).arg(od["first_name"].toString()));
-    range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("L81:L81")));
-    range->dynamicCall( "SetValue(const QVariant&)", QString("%1 %2").arg(od["last_name"].toString()).arg(od["first_name"].toString()));
+    range->dynamicCall( "SetValue(const QVariant&)", oc["state_license_plate"].toString());
 
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("B22:B22")));
     range->dynamicCall( "SetValue(const QVariant&)", startDateTime.toString("HH:mm"));
@@ -182,11 +211,17 @@ void Dlg::printWaybill(QJsonObject o)
 
 
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("DG28:DG28")));
-    range->dynamicCall( "SetValue(const QVariant&)", od["last_name"].toString().left(1) + ". " + od["first_name"].toString());
+    range->dynamicCall( "SetValue(const QVariant&)", od["surname"].toString() + " " + od["name"].toString().left(1) + ". " + od["patronymic"].toString().left(1) + ".");
     range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("DG95:DG95")));
-    range->dynamicCall( "SetValue(const QVariant&)", od["last_name"].toString().left(1) + ". " + od["first_name"].toString());
+    range->dynamicCall( "SetValue(const QVariant&)", od["surname"].toString() + " " + od["name"].toString().left(1) + ". " + od["patronymic"].toString().left(1) + ".");
+
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("HK57:HK57")));
+    range->dynamicCall( "SetValue(const QVariant&)", od["surname"].toString() + " " + od["name"].toString().left(1) + ". " + od["patronymic"].toString().left(1) + ".");
+    range = statSheet->querySubObject("Range(const QVariant&)", QVariant( QString("HK124:HK124")));
+    range->dynamicCall( "SetValue(const QVariant&)", od["surname"].toString() + " " + od["name"].toString().left(1) + ". " + od["patronymic"].toString().left(1) + ".");
     statSheet->dynamicCall("PrintOut(int,int,int,bool,String)", 1, 100, 1, QVariant(false), "Canon");
 
+    workbook->dynamicCall("Save()", false);
     workbook->dynamicCall("Close(QVariant)", false);
     excel->dynamicCall("Quit()");
 
@@ -194,6 +229,7 @@ void Dlg::printWaybill(QJsonObject o)
                                       SLOT(deleteFile(bool,QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->setProperty("file", dstFile.fileName());
+    hr->setProperty("qr", QDir::tempPath() + "/qr.png");
     hr->setFileName("waybill", dstFile.fileName());
     hr->setFormData("transaction_id", ow["number"].toString());
     hr->postRequest();
@@ -411,6 +447,8 @@ void Dlg::deleteFile(bool error, const QString &data)
     qDebug() << data;
     QFile f(sender()->property("file").toString());
     f.remove();
+    QFile qr(sender()->property("qr").toString());
+    qr.remove();
     sender()->deleteLater();
 }
 

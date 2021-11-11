@@ -155,10 +155,10 @@ bool CashBox::ProcessCommand()
     LPCOMSTAT ComStat;
 
     ClearCommError(FComFile, Errs, ComStat);
-    if (Errs != 0) {
-        QMessageBox::critical(0, "ComPort Error", QString("GetLastError() returned #%1").arg(GetLastError()));
-        return false;
-    }
+//    if (Errs != 0) {
+//        QMessageBox::critical(0, "ComPort Error", QString("GetLastError() returned #%1").arg(GetLastError()));
+//        return false;
+//    }
     if (ComStat) {
         if (ComStat->cbInQue > 0) {
             if (!PurgeComm(FComFile, PURGE_TXCLEAR | PURGE_RXCLEAR)) {
@@ -201,7 +201,7 @@ bool CashBox::ProcessCommand()
 
 void CashBox::errorLog(const QString &msg)
 {
-    //QMessageBox::critical(0, "ERROR", msg);
+    QMessageBox::critical(0, "ERROR", msg);
 #ifndef QT_DEBUG
     exit(0);
 #endif
