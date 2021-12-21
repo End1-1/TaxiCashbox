@@ -2,12 +2,14 @@
 #include <QException>
 #include <QDateTime>
 #include <QMessageBox>
+#include <QApplication>
 #include <QDebug>
 
 CashBox::CashBox() :
     QObject(nullptr)
 {
-
+    connect(&fTimer, &QTimer::timeout, this, &CashBox::timeout);
+    //fTimer.start(200);
 }
 
 CashBox::~CashBox()
@@ -254,7 +256,7 @@ bool CashBox::EnableBillTypes(Nominal n)
   }
 
   if (FData[0] == 0x00) {
-    emit ProcessMessage(203, "<-ASC");
+    emit ProcessMessage(203, QString("<-ASC"));
   }
 // except
 //   on E:Exception do begin
@@ -336,6 +338,7 @@ WORD CashBox::PollingLoop(WORD Sum, DWORD TimeLoop)
 
     FCanPollingLoop = true;
     while (FCanPollingLoop) {
+        qApp->processEvents();
         if (Poll()) {
             FirstByte = FData[0];
             SecondByte = FData[1];
@@ -501,6 +504,7 @@ WORD CashBox::PollingLoop(WORD Sum, DWORD TimeLoop)
             emit ProcessMessage(249,"Завершаем работу по таймауту приема купюры");
         }
     }
+    emit EndPolling();
     return result;
 }
 
@@ -533,4 +537,34 @@ bool CashBox::Reset()
         emit ProcessMessage(203, "<-ASC");
     }
     return true;
+}
+
+void CashBox::reset()
+{
+    Reset();
+}
+
+void CashBox::canPollingLoop(bool v)
+{
+    FCanPollingLoop = v;
+}
+
+void CashBox::enableBillTypes(Nominal n)
+{
+    EnableBillTypes(n);
+}
+
+void CashBox::pollingLoop(WORD sum, DWORD TimeLoop)
+{
+    PollingLoop(sum, TimeLoop);
+}
+
+void CashBox::poll()
+{
+    Poll();
+}
+
+void CashBox::timeout()
+{
+
 }

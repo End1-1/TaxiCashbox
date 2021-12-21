@@ -1,6 +1,5 @@
 #include "dlg.h"
 #include "ui_dlg.h"
-#include "cashbox.h"
 #include "config.h"
 #include "httprequest.h"
 #include "wloading.h"
@@ -15,11 +14,13 @@
 #include <QJsonObject>
 #include <QSettings>
 #include <QAxObject>
+#include <QJsonArray>
 #include <QMessageBox>
 #include <QDir>
 #include <QMutex>
 #include <QFile>
 #include <ctime>
+#include <QThread>
 
 static CashBox c;
 static QSettings _s("YELLOWTAXI", "TERMINAL");
@@ -31,18 +32,33 @@ Dlg::Dlg(QWidget *parent)
 {
     ui->setupUi(this);
 
+    qRegisterMetaType<Nominal>("Nominal");
+    qRegisterMetaType<WORD>("WORD");
+    qRegisterMetaType<DWORD>("DWORD");
+
     connect(&c, SIGNAL(ProcessMessage(int,QString)), this, SLOT(message(int,QString)));
     connect(&c, SIGNAL(PolingBill(WORD,bool)), this, SLOT(bill(WORD,bool)));
+    connect(&c, SIGNAL(EndPolling()), this, SLOT(c_endPolling()));
+    connect(this, SIGNAL(c_reset()), &c, SLOT(reset()));
+    connect(this, SIGNAL(c_canPollingLoop(bool)), &c, SLOT(canPollingLoop(bool)));
+    connect(this, SIGNAL(c_enableBillTypes(Nominal)), &c, SLOT(enableBillTypes(Nominal)));
+    connect(this, SIGNAL(c_pollingLoop(WORD,DWORD)), &c, SLOT(pollingLoop(WORD,DWORD)));
+    connect(this, SIGNAL(c_poll()), &c, SLOT(poll()));
     if (c.openComPort(_s.value("com_port").toString().toUtf8().data())) {
         qDebug() << "OPENED";
     }
+    auto *cThread = new QThread();
+    c.moveToThread(cThread);
+    cThread->start();
+
     FSum = 0;
     fDeposit = 0;
     fUserPageTimeout = 0;
     fCurrentWidget = nullptr;
+    fWaybillSelected = 1;
 
     addWidget(new wLoading());
-    qApp->processEvents();
+    //qApp->processEvents();
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth").arg(server), SLOT(auth(bool, QString)), this);
     hr->fContentType = "application/json";
     QJsonObject jo;
@@ -61,14 +77,16 @@ Dlg::~Dlg()
     delete ui;
 }
 
-void Dlg::printWaybill(QJsonObject o)
+void Dlg::printWaybill(QJsonArray ja)
 {
+    for (int i = 0; i < ja.count(); i++) {
+        QJsonObject jo = ja[i].toObject();
     srand(time(0));
     QString r = QString("/ah_%1.xlsm").arg(rand());
-    QJsonObject ow = o["waybill"].toObject();
-    QJsonObject oc = o["car"].toObject();
-    QJsonObject od = o["driver"].toObject();
-    QJsonObject op = o["park"].toObject();
+    QJsonObject ow = jo["waybills"].toObject();
+    QJsonObject oc = jo["car"].toObject();
+    QJsonObject od = jo["driver"].toObject();
+    QJsonObject op = jo["park"].toObject();
     QDateTime startDateTime = QDateTime::fromString(ow["start_date"].toString(), "yyyy-MM-dd HH:mm");
     QDateTime endDateTime = QDateTime::fromString(ow["end_date"].toString(), "yyyy-MM-dd HH:mm");
     QFile srcFile(qApp->applicationDirPath() + "/wb.xlsm");
@@ -230,8 +248,8 @@ void Dlg::printWaybill(QJsonObject o)
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->setProperty("file", dstFile.fileName());
     hr->setProperty("qr", QDir::tempPath() + "/qr.png");
-    hr->setFileName("waybill", dstFile.fileName());
-    hr->setFormData("transaction_id", ow["number"].toString());
+    hr->setFormData("transaction_id", QString::number(jo["transaction_id"].toInt()));
+    hr->setFileName("waybill",  dstFile.fileName());
     hr->postRequest();
 
     delete range;
@@ -240,13 +258,13 @@ void Dlg::printWaybill(QJsonObject o)
     delete workbook;
     delete workbooks;
     delete excel;
-
+    }
 }
 
 void Dlg::requestAuthDriver(const QString &username, const QString &password)
 {
     addWidget(new wLoading());
-    qApp->processEvents();
+    //qApp->processEvents();
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/auth_driver").arg(server),
                                       SLOT(authDriver(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("token").toString());
@@ -257,37 +275,26 @@ void Dlg::requestAuthDriver(const QString &username, const QString &password)
 
 void Dlg::startReceiveMoney()
 {
-        WORD FSum = 0;
-        Nominal n;
+    WORD FSum = 0;
+    Nominal n;
+    
+    //  CashCodeBillValidatorCCNET.Reset;
+    // Óñòàíîâèì ïðèíèìàåìûå êóïþðû
+    n.B10 = true;
+    n.B50 = true;
+    n.B100 = true;
+    n.B500 = true;
+    n.B1000 = true;
+    n.B5000 = true;
+    emit c_enableBillTypes(n);
 
-        //  CashCodeBillValidatorCCNET.Reset;
-          // Óñòàíîâèì ïðèíèìàåìûå êóïþðû
-          n.B10   =   true;
-          n.B50  =   true;
-          n.B100  =   true;
-          n.B500 =   true;
-          n.B1000 =   true;
-          n.B5000 =   true;
-          c.EnableBillTypes(n);
-
-          c.PollingLoop(150000, 50);
-          qDebug() << QString("%1").arg(FSum);
-
-          // Çàïðåòèì ïðèåì âñåõ êóïþð
-          n.B10   =   false;
-          n.B50   =   false;
-          n.B100  =   false;
-          n.B500  =   false;
-          n.B1000  =   false;
-          n.B5000  =   false;
-          c.EnableBillTypes(n);
-
-          c.Poll();
+    emit c_pollingLoop((WORD)150000, 50);
+    qDebug() << QString("%1").arg(FSum);
 }
 
 void Dlg::stopReceiveMoney()
 {
-    c.FCanPollingLoop = false;
+    emit c_canPollingLoop(false);
 }
 
 void Dlg::getMoney(int mode)
@@ -344,7 +351,6 @@ void Dlg::authDriver(bool error, const QString &data)
 
 void Dlg::addCashResponse(bool error, const QString &data)
 {
-    qDebug() << data;
     if (error) {
         return;
     }
@@ -364,7 +370,7 @@ void Dlg::payResponse(bool error, const QString &data)
     }
     addWidget(new wFinish(false, this));
     if (fMode == 3) {
-        printWaybill(QJsonDocument::fromJson(data.toUtf8()).object());
+        printWaybill(QJsonDocument::fromJson(data.toUtf8()).array());
     }
 }
 
@@ -379,11 +385,12 @@ void Dlg::debts(bool error, const QString &data)
     FNeeded = jo["minimal_repayment_waybill"].toDouble();
     FDept = jo["debt"].toDouble();
     fDeposit = jo["balance"].toDouble();
+    fWaybillMax = jo["waybills_allowed_limit"].toInt();
     if (fTransactionAmount > 0.01) {
         addWidget(new wProcessIncomplete(this));
         return;
     }
-    _s.setValue("balance", jo);
+    _s.setValue("balance", data);
     addWidget(new wBalancePage(this));
 }
 
@@ -430,13 +437,12 @@ void Dlg::message(int code, const QString &msg)
 //    }
     switch (code) {
     case 217:
-        c.FCanPollingLoop = false;
+        emit c_canPollingLoop(false);
         startReceiveMoney();
         break;
     }
 
     qDebug() << QString("%1: %2").arg(code).arg(msg);
-    qApp->processEvents();
 }
 
 void Dlg::deleteFile(bool error, const QString &data)
@@ -463,6 +469,19 @@ void Dlg::bill(WORD sum, bool canLoop)
     emit totalSum(FSum, FNeeded, FRemain);
 }
 
+void Dlg::c_endPolling()
+{
+    Nominal n;
+    n.B10   =   false;
+    n.B50   =   false;
+    n.B100  =   false;
+    n.B500  =   false;
+    n.B1000  =   false;
+    n.B5000  =   false;
+    emit c_enableBillTypes(n);
+    emit c_poll();
+}
+
 void Dlg::timeout()
 {
     fUserPageTimeout++;
@@ -481,8 +500,10 @@ QWidget *Dlg::addWidget(QWidget *w)
 
 void Dlg::addCash(double cash)
 {
-    c.FCanPollingLoop = false;
-    c.Reset();
+    emit c_canPollingLoop(false);
+    qDebug() << "BEFORE RESET";
+    emit c_reset();
+    qDebug() << "AFTER RESET";
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/add_cash").arg(server), SLOT(addCashResponse(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->setFormData("type", QString::number(fMode));
@@ -503,7 +524,7 @@ void Dlg::resetData()
     FNeeded = 0;
     fMode = 0;
     fDeposit = 0;
-    c.FCanPollingLoop = false;
+    emit (c_canPollingLoop(false));
 }
 
 void Dlg::firstPage()
@@ -568,6 +589,7 @@ void Dlg::makePayment(int mode, double cash)
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/").arg(server) + route, SLOT(payResponse(bool, QString)), this);
     hr->setHeader("Authorization", "Bearer " + _s.value("driver_token").toString());
     hr->setFormData("cash", QString::number(cash, 'f', 2));
+    hr->setFormData("days", QString::number(fWaybillSelected));
     if (fMode == 2 || fMode == 3) {
         hr->setFormData("deposit", QString::number(fDeposit, 'f', 2));
     }    
@@ -576,7 +598,7 @@ void Dlg::makePayment(int mode, double cash)
 
 void Dlg::closeEvent(QCloseEvent *e)
 {
-    c.FCanPollingLoop = false;
+    emit (c_canPollingLoop(false));
     QDialog::closeEvent(e);
 }
 

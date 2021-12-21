@@ -96,6 +96,9 @@ void HttpRequest::startThread()
 
 void HttpRequest::log(const QString &l)
 {
+#ifdef QT_DEBUG
+    qDebug() << l;
+#endif
     QFile f("log.txt");
     if (f.open(QIODevice::Append)) {
         f.write(l.toUtf8());
@@ -106,7 +109,7 @@ void HttpRequest::log(const QString &l)
 
 void HttpRequest::start()
 {
-    QUrl url(fUrl);;
+    QUrl url(fUrl);
     QNetworkRequest nr = QNetworkRequest(url);
     if (fUrl.contains("https://")) {
         QSslConfiguration sslConf = nr.sslConfiguration();
@@ -124,6 +127,8 @@ void HttpRequest::start()
     for (QMap<QString, QString>::const_iterator it = fHeader.begin(); it != fHeader.end(); it++) {
         nr.setRawHeader(it.key().toLatin1(), it.value().toLatin1());
     }
+    qDebug() << "Start " << fUrl;
+    fTimer.start();
     switch (fRequestMethod) {
     case rmGET:
         get(nr);
@@ -137,6 +142,7 @@ void HttpRequest::start()
 void HttpRequest::finished(QNetworkReply *reply)
 {
     QByteArray data = reply->readAll();
+    qDebug() << "End " << fUrl << fTimer.elapsed();
     log(data);
     if (reply->error() == QNetworkReply::NoError) {
         emit response(false, data);

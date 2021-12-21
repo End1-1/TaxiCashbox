@@ -1,6 +1,6 @@
 #include "wusernamepassword.h"
 #include "ui_wusernamepassword.h"
-#include "dlg.h";
+#include "dlg.h"
 
 wUsernamePassword::wUsernamePassword(QWidget *parent) :
     Widget(parent),

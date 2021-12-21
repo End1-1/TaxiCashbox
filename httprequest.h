@@ -2,6 +2,7 @@
 #define HTTPREQUEST_H
 
 #include <QNetworkAccessManager>
+#include <QElapsedTimer>
 
 class HttpRequest : public QNetworkAccessManager
 {
@@ -22,6 +23,7 @@ private:
     QMap<QString, QString> fHeader;
     QMap<QString, QString> fFiles;
     int fRequestMethod;
+    QElapsedTimer fTimer;
     void startThread();
     void log(const QString &l);
 

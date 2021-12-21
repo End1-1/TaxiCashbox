@@ -70,7 +70,7 @@ void wMoneyInput::on_btnNext_clicked()
     ui->btnDeposit->setEnabled(false);
     ui->btnNext->setEnabled(false);
     fDlg->stopReceiveMoney();
-    qApp->processEvents();
+    //qApp->processEvents();
     fTimer->stop();
     fDlg->makePayment();
 }
@@ -97,7 +97,7 @@ void wMoneyInput::on_btnDeposit_clicked()
     ui->btnNext->setEnabled(false);
     ui->btnDeposit->setEnabled(false);
     fDlg->stopReceiveMoney();
-    qApp->processEvents();
+    //qApp->processEvents();
     fTimer->stop();
     fDlg->fMode = 1;
     fDlg->makePayment();

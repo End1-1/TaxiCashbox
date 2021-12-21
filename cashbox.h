@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QObject>
+#include <QTimer>
 #include <windows.h>
 
 const int POLYNOM = 0x08408,
@@ -47,6 +48,13 @@ public:
     bool SendASC();
     bool Reset();
 
+public slots:
+    void reset();
+    void canPollingLoop(bool v);
+    void enableBillTypes(Nominal n);
+    void pollingLoop(WORD sum, DWORD TimeLoop);
+    void poll();
+
 private:
     HANDLE FComFile;
     BYTE FData[255];
@@ -56,10 +64,15 @@ private:
     BYTE FAnswer[255];
     DWORD FLengthAnswer;
     bool FComConnected;
+    QTimer fTimer;
+
+private slots:
+    void timeout();
 
 signals:
     void ProcessMessage(int CodeMess, const QString &msg);
     void PolingBill(WORD Bill, bool CanLoop);
+    void EndPolling();
 };
 
 #endif // CASHBOX_H

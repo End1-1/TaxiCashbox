@@ -9,5 +9,7 @@
         <file>res/shift.png</file>
         <file>res/usa.png</file>
         <file>CashBox.qm</file>
+        <file>res/down.png</file>
+        <file>res/up.png</file>
     </qresource>
 </RCC>

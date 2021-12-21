@@ -15,7 +15,9 @@ public:
     explicit wBalancePage(QWidget *parent = nullptr);
     ~wBalancePage();
 
-private slots:    
+private slots:
+    void nextWaybillPage(bool error, const QString &d);
+
     void on_btnNext_clicked();
 
     void on_btnFillBalance_clicked();
@@ -25,6 +27,10 @@ private slots:
     void on_btnWaybill_clicked();
 
     void on_btnExit_clicked();
+
+    void on_btnUP_clicked();
+
+    void on_btnDown_clicked();
 
 private:
     Ui::wBalancePage *ui;

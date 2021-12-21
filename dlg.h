@@ -1,6 +1,7 @@
 #ifndef DLG_H
 #define DLG_H
 
+#include "cashbox.h"
 #include <QDialog>
 #include <windows.h>
 #include <QTimer>
@@ -24,8 +25,10 @@ public:
     double FNeeded;
     double FDept;
     double fDeposit;
+    int fWaybillMax;
+    int fWaybillSelected;
 
-    void printWaybill(QJsonObject o);
+    void printWaybill(QJsonArray ja);
     void requestAuthDriver(const QString &username, const QString &password);
     void startReceiveMoney();
     void stopReceiveMoney();
@@ -42,6 +45,7 @@ public slots:
     void bill(WORD sum, bool canLoop);
 
 private slots:
+    void c_endPolling();
     void timeout();
     void auth(bool error, const QString &data);
     void authDriver(bool error, const QString &data);
@@ -62,6 +66,12 @@ private:
 
 signals:
     void totalSum(double a, double b, double c);
+    void c_stopReceiveMoney();
+    void c_reset();
+    void c_canPollingLoop(bool v);
+    void c_enableBillTypes(Nominal n);
+    void c_poll();
+    void c_pollingLoop(WORD,DWORD);
 
 };
 #endif // DLG_H
