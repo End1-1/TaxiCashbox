@@ -61,6 +61,7 @@ void wBalancePage::on_btnDept_clicked()
 
 void wBalancePage::on_btnWaybill_clicked()
 {
+
     fDlg->fWaybillSelected = ui->leWaybills->text().toInt();
     HttpRequest *hr = new HttpRequest(QString("https://%1/app/terminal/selected_waybills_price?days=%2")
                                       .arg(server)

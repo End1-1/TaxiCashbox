@@ -4,8 +4,9 @@
 //
 
 
-//#define server "192.168.0.101"
+//#define server "192.168.0.110"
 #define server "newyellowtaxi.com"
+
 
 #endif // CONFIG_H
 

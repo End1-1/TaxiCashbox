@@ -598,7 +598,7 @@ void Dlg::makePayment(int mode, double cash)
 
 void Dlg::closeEvent(QCloseEvent *e)
 {
-    emit (c_canPollingLoop(false));
+    emit c_canPollingLoop(false);
     QDialog::closeEvent(e);
 }
 

@@ -65,6 +65,7 @@ void wMoneyInput::timeout()
 
 void wMoneyInput::on_btnNext_clicked()
 {
+    ui->btnBack->setEnabled(false);
     ui->btn100->setEnabled(false);
     ui->btn1000->setEnabled(false);
     ui->btnDeposit->setEnabled(false);
@@ -105,5 +106,12 @@ void wMoneyInput::on_btnDeposit_clicked()
 
 void wMoneyInput::on_btnBack_clicked()
 {
-    fDlg->firstPage();
+    //fDlg->firstPage();
+    fDlg->stopReceiveMoney();
+    //qApp->processEvents();
+    //fTimer->stop();
+    ui->btnDeposit->setEnabled(false);
+    ui->btn100->setEnabled(false);
+    ui->btn1000->setEnabled(false);
+    fDlg->userPage();
 }
